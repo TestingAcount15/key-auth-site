@@ -10,14 +10,14 @@
             text-align: center;
             margin: 50px;
         }
-        #success, #error {
+        #success, #error, #blacklisted {
             display: none;
             margin-top: 20px;
         }
         #success {
             color: green;
         }
-        #error {
+        #error, #blacklisted {
             color: red;
         }
     </style>
@@ -30,21 +30,45 @@
 
     <div id="success">You got in successfully!</div>
     <div id="error">Invalid key. Please try again.</div>
+    <div id="blacklisted">Your key is blacklisted. Please contact support.</div>
 
     <script>
         async function verifyKey() {
-            const key = document.getElementById("keyInput").value;
+            const key = document.getElementById("keyInput").value.trim();
             const successDiv = document.getElementById("success");
             const errorDiv = document.getElementById("error");
+            const blacklistedDiv = document.getElementById("blacklisted");
 
+            // Reset display states
             successDiv.style.display = "none";
             errorDiv.style.display = "none";
+            blacklistedDiv.style.display = "none";
 
             try {
-                const response = await fetch(`http://localhost:8000/validate_key/${key}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    successDiv.textContent = `You got in successfully! Welcome, ${data.username}!`;
+                // Fetch keys.json and blacklist.json from the GitHub repository
+                const [keysResponse, blacklistResponse] = await Promise.all([
+                    fetch("https://raw.githubusercontent.com/TestingAcount15/key-auth-site/refs/heads/main/keys.json"),
+                    fetch("https://raw.githubusercontent.com/TestingAcount15/key-authsite/refs/heads/main/blacklist.json")
+                ]);
+
+                if (!keysResponse.ok || !blacklistResponse.ok) {
+                    throw new Error("Failed to fetch key or blacklist data.");
+                }
+
+                const keysData = await keysResponse.json();
+                const blacklistData = await blacklistResponse.json();
+
+                // Check if the entered key is blacklisted
+                const isBlacklisted = blacklistData.blacklistedKeys.some(blacklistedKey => blacklistedKey.key === key);
+                if (isBlacklisted) {
+                    blacklistedDiv.style.display = "block";
+                    return;
+                }
+
+                // Check if the entered key is valid
+                const validKey = keysData.keys.find(k => k.key === key);
+                if (validKey) {
+                    successDiv.textContent = `You got in successfully! Welcome, ${validKey.username}!`;
                     successDiv.style.display = "block";
                 } else {
                     errorDiv.textContent = "Invalid key. Please try again.";
