@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Key Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        #success, #error {
+            display: none;
+            margin-top: 20px;
+        }
+        #success {
+            color: green;
+        }
+        #error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Key Verification</h1>
+    <p>Enter your key to access the dashboard:</p>
+    <input type="text" id="keyInput" placeholder="Enter your key" />
+    <button onclick="verifyKey()">Submit</button>
+
+    <div id="success">You got in successfully!</div>
+    <div id="error">Invalid key. Please try again.</div>
+
+    <script>
+        async function verifyKey() {
+            const key = document.getElementById("keyInput").value;
+            const successDiv = document.getElementById("success");
+            const errorDiv = document.getElementById("error");
+
+            successDiv.style.display = "none";
+            errorDiv.style.display = "none";
+
+            try {
+                const response = await fetch(`http://localhost:8000/validate_key/${key}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    successDiv.textContent = `You got in successfully! Welcome, ${data.username}!`;
+                    successDiv.style.display = "block";
+                } else {
+                    errorDiv.textContent = "Invalid key. Please try again.";
+                    errorDiv.style.display = "block";
+                }
+            } catch (error) {
+                errorDiv.textContent = "Error validating key. Please try again later.";
+                errorDiv.style.display = "block";
+            }
+        }
+    </script>
+</body>
+</html>
