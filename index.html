@@ -45,10 +45,10 @@
             blacklistedDiv.style.display = "none";
 
             try {
-                // Fetch keys.json and blacklist.json from the GitHub repository
+                // Fetch keys.json and blacklist.json from the same repository directory
                 const [keysResponse, blacklistResponse] = await Promise.all([
-                    fetch("https://raw.githubusercontent.com/TestingAcount15/key-auth-site/refs/heads/main/keys.json"),
-                    fetch("https://raw.githubusercontent.com/TestingAcount15/key-authsite/refs/heads/main/blacklist.json")
+                    fetch("keys.json"),
+                    fetch("blacklist.json")
                 ]);
 
                 if (!keysResponse.ok || !blacklistResponse.ok) {
@@ -76,6 +76,7 @@
                     errorDiv.style.display = "block";
                 }
             } catch (error) {
+                console.error("Error during key validation:", error);
                 errorDiv.textContent = "Error validating key. Please try again later.";
                 errorDiv.style.display = "block";
             }
