@@ -59,16 +59,17 @@
                 const blacklistData = await blacklistResponse.json();
 
                 // Check if the entered key is blacklisted
-                const isBlacklisted = blacklistData.blacklistedKeys.some(blacklistedKey => blacklistedKey.key === key);
+                const isBlacklisted = Object.values(blacklistData).some(entry => entry.key === key);
                 if (isBlacklisted) {
+                    blacklistedDiv.textContent = "Your key is blacklisted. Please contact support.";
                     blacklistedDiv.style.display = "block";
                     return;
                 }
 
                 // Check if the entered key is valid
-                const validKey = keysData.keys.find(k => k.key === key);
-                if (validKey) {
-                    successDiv.textContent = `You got in successfully! Welcome, ${validKey.username}!`;
+                const validEntry = Object.values(keysData).find(entry => entry.key === key);
+                if (validEntry) {
+                    successDiv.textContent = `You got in successfully! Welcome, ${validEntry.username}!`;
                     successDiv.style.display = "block";
                 } else {
                     errorDiv.textContent = "Invalid key. Please try again.";
